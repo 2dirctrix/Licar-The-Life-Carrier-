@@ -1,0 +1,48 @@
+# cases:
+#   1:
+#     action: move      # 의국
+#     x: -0.15
+#     y: 2.5
+#   11:
+#     action: move      # 엘리베이터 앞
+#     x: 1.6
+#     y: 19.0
+
+#   12:
+#     action: move      # 엘리베이터 안으로
+#     x: 1.85
+#     y: 21.2
+  
+#   301:
+#     action: move   # 301호
+#     x: -2.2
+#     y: -7.3
+#   302:
+#     action: move   # 302호
+#     x: 9.0
+#     y: -7.3
+
+
+cases:
+  1:
+    action: move      # 의국
+    x: -0.15
+    y: 2.5
+  11:
+    action: move      # 엘리베이터 앞
+    x: 5.0
+    y: 12.0
+
+  12:
+    action: move      # 엘리베이터 안으로
+    x: 4
+    y: 10
+  
+  301:
+    action: move   # 301호
+    x: -2.2
+    y: -7.3
+  302:
+    action: move   # 302호
+    x: 9.0
+    y: -7.3

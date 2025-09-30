@@ -1,0 +1,142 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="elevator">
+    <pose>0 0 0.075 0 0 0</pose>
+
+    <!-- Main elevator link (원본 elevator.world의 "link"와 동일) -->
+    <link name="link">
+      <inertial>
+        <mass>800</mass>
+        <inertia>
+          <ixx>100</ixx><iyy>100</iyy><izz>100</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+
+      <!-- Hospital elevator car visual using mesh -->
+      <visual name="elevator_car_visual">
+        <geometry>
+          <mesh>
+            <uri>model://licar_elevator/meshes/aws_robomaker_hospital_elevator_01_car_visual.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <!-- Hospital elevator car collision using mesh -->
+      <collision name="elevator_car_collision">
+        <geometry>
+          <mesh>
+            <uri>model://licar_elevator/meshes/aws_robomaker_hospital_elevator_01_car_collision.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+    </link>
+
+    <!-- Door link (hospital elevator에 맞게 조정) -->
+    <link name="door_link">
+      <pose>0 0.5 1.125 0 0 0</pose>
+      <inertial>
+        <mass>50</mass>
+        <inertia>
+          <ixx>5</ixx><iyy>5</iyy><izz>5</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <!-- Hospital elevator door collision -->
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>1 0.08 2.25</size>
+          </box>
+        </geometry>
+      </collision>
+      <!-- Hospital elevator door visual -->
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>1 0.08 2.25</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.8 0.9</ambient>
+          <diffuse>0.7 0.7 0.8 0.9</diffuse>
+          <specular>0.3 0.3 0.3 1</specular>
+        </material>
+      </visual>
+    </link>
+
+    <!-- Door joint (원본 elevator.world와 동일) -->
+    <joint name="door" type="prismatic">
+      <parent>link</parent>
+      <child>door_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1</upper>
+          <effort>10</effort>
+        </limit>
+        <dynamics>
+          <damping>2</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <!-- Lift joint (원본 elevator.world와 동일) -->
+    <joint name="lift" type="prismatic">
+      <parent>world</parent>
+      <child>link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>10</upper>
+          <effort>100000</effort>
+        </limit>
+        <dynamics>
+          <damping>50</damping>
+        </dynamics>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+        </ode>
+      </physics>
+    </joint>
+
+    <!-- ElevatorPlugin (실제 건물 층고에 맞게 조정) -->
+    <plugin filename="libElevatorPlugin.so" name="elevator_plugin">
+      <lift_joint>elevator::lift</lift_joint>
+      <door_joint>elevator::door</door_joint>
+      <floor_height>3.043</floor_height>
+
+      <!-- Time the elevator door will stay open in seconds -->
+      <door_wait_time>15</door_wait_time>
+
+      <!-- This topic is used to control the elevator -->
+      <topic>~/elevator</topic>
+    </plugin>
+
+    <!-- Joint State Publisher (ROS2 호환성) -->
+    <plugin filename="libgazebo_ros_joint_state_publisher.so" name="joint_state_publisher">
+      <ros>
+        <namespace>/elevator</namespace>
+      </ros>
+      <update_rate>50</update_rate>
+      <joint_name>lift</joint_name>
+      <joint_name>door</joint_name>
+    </plugin>
+
+    <!-- Link State Publisher (ROS2 호환성) -->
+    <plugin filename="libgazebo_ros_state.so" name="gazebo_ros_state">
+      <ros>
+        <namespace>/elevator</namespace>
+      </ros>
+      <update_rate>50</update_rate>
+      <publish_link_states>true</publish_link_states>
+      <publish_model_states>true</publish_model_states>
+    </plugin>
+
+  </model>
+</sdf>

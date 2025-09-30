@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://cdds.io/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://cdds.io/config https://cdds.io/config/cdds-2.0.xsd">
+    <Domain id="any">
+        <General>
+            <!-- 사용할 네트워크 인터페이스 목록을 명시적으로 지정 -->
+            <!-- 'wlan0', 'eth0', 'Wi-Fi' 등 ifconfig/ip addr 로 확인한 실제 인터페이스 이름을 적으세요. -->
+            <NetworkInterfaceAddress>eth0</NetworkInterfaceAddress>
+        </General>
+        <Discovery>
+            <Peers>
+                <!-- ROS_STATIC_PEERS와 동일한 역할 -->
+                <!-- 라즈베리 파이의 XML 파일에는 시뮬레이터 IP를, 시뮬레이터 XML 파일에는 라즈베리 파이 IP를 적으세요. -->
+                <Peer address="192.168.100.246"/> 
+            </Peers>
+        </Discovery>
+    </Domain>
+</CycloneDDS>

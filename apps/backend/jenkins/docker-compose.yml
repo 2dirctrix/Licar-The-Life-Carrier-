@@ -1,0 +1,39 @@
+services:
+  jenkins:
+    build:
+      context: .
+    container_name: jenkins
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./jenkins_home:/var/jenkins_home
+      - ../.env:/var/licar/.env:ro
+    environment:
+      - JENKINS_OPTS=--prefix=/jenkins
+      - TZ=Asia/Seoul
+    group_add:
+      - ${DOCKER_GID}
+    networks:
+      - drug-network
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    depends_on:
+      - jenkins
+    networks:
+      - drug-network
+
+networks:
+  drug-network:
+    driver: bridge
+    name: drug-network

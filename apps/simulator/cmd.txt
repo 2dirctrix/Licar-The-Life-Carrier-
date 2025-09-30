@@ -1,0 +1,26 @@
+~/aws_robomaker_hospital_elevator_01_*/model.sdf
+20번째줄
+<static>0<!--1--></static> 으로 교체
+
+three_floor 월드 안에 <plugin name="gazebo_ros_factory" filename="libgazebo_ros_factory.so"/> 추가
+
+hospital_three_floor.world 파일에서 aws_robomaker_hospital_floor_01_ceiling_1 찾고 y 위치 -1.57로 바꿈
+
+sudo apt update
+sudo apt install ros-humble-gazebo-ros-pkgs
+
+ros2 service call /pause_physics std_srvs/srv/Empty {}
+
+ros2 run gazebo_ros spawn_entity.py \
+  -entity car_1 \
+  -file ~/aws-robomaker-hospital-world/models/licar_elevator/model.sdf \
+  -x -1.49587 -y 19.35 -z 0.19
+
+ros2 service call /spawn_all std_srvs/srv/Trigger
+
+ros2 topic pub -1 /set_joint_trajectory trajectory_msgs/msg/JointTrajectory "{header: {frame_id: 'base_link'}, joint_names: ['lift_joint'], points: [{positions: [0.19], time_from_start: {sec: 0, nanosec: 50000000}}]}"
+ros2 service call /unpause_physics std_srvs/srv/Empty {}
+ros2 service call /pause_physics std_srvs/srv/Empty {}
+
+
+ros2 service call /delete_entity gazebo_msgs/srv/DeleteEntity "{name: 'car_1'}"

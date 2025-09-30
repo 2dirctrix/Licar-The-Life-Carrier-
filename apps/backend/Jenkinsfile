@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'develop', credentialsId: 'git-credentials', url: 'https://lab.ssafy.com/s13-mobility-smarthome-sub1/S13P21C206.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    // sh 'docker build -t your-username/spring-app:latest ./backend'
+                    sh 'cd apps/backend/licar && chmod +x gradlew && ./gradlew clean build -x test'
+                    // sh 'cd licar && chmod +x gradlew && ./gradlew clean build -x test'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t spring:latest ./apps/backend/licar'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    sh 'cp /var/licar/.env apps/backend/.env'
+                    sh 'cd apps/backend && docker compose down && docker compose up -d'
+                    sh 'rm apps/backend/.env'
+                }
+            }
+        }
+    }
+}

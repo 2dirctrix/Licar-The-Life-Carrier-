@@ -1,0 +1,36 @@
+# ROS2 build and install folders
+build/
+install/
+log/
+
+# Colcon build artifacts
+*.log
+*.pyc
+*.pyo
+*.egg-info/
+.colcon/
+.colcon_install_layout
+
+# Python cache
+__pycache__/
+
+# VSCode settings
+.vscode/
+
+# MacOS
+.DS_Store
+
+# ROS2 launch/params/test logs
+*.launch.pyc
+*.test.pyc
+*.params.pyc
+
+
+# Other common ignores
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.user
+*.~*

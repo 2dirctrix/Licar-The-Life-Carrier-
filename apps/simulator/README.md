@@ -7,7 +7,7 @@ Gazebo 환경에서 AWS Hospital 맵을 불러와 Nav2를 수행하는 시나리
 - ROS2 Humble
 
 ## 1. ROS2 Installation
-<b> [Reference Link](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs. html#id4) </b>
+<b> [Reference Link](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html#id4) </b>
 ```bash
 locale  # check for UTF-8
 
@@ -132,3 +132,46 @@ alias killgazebo="killall gzserver gzclient"
 alias humble="source /opt/ros/humble/setup.bash; echo \"ROS2 Humble is activated.\""
 alias turtlebot="humble; source ${TURTLE_WS_PATH}/install/local_setup.bash; echo \"turtlebot workspace is activated.\""
 ```
+# 실행 순서(순서대로)
+
+### 첫번째 터미널
+ - gazebo 실행
+```
+cd S13P21C206/apps/simulator/ros2_ws/
+ros2 launch licar_bringup test.launch.py
+```
+### 두번째 터미널
+ - nav2(rviz) 실행
+```
+cd S13P21C206/apps/simulator/ros2_ws/
+ros2 launch licar_bringup navigation2_with_initial_pose.launch.py \
+    use_sim_time:=True \
+    map:=$HOME/S13P21C206/apps/simulator/maps/0915_1714/map.yaml
+```
+### 새번째 터미널
+ - 카메라 센서 뷰
+```
+ros2 run rqt_image_view rqt_image_view
+```
+### 네번째 터미널
+ - ros2 data 송출
+```
+ros2 topic pub --once /turtlebot_target std_msgs/msg/Int32 "data: 301"
+```
+### 기타 명령
+ - 엘리베이터 이동 명령 (새 터미널 혹은 네번째 터미널에서)
+```
+gz topic -p /gazebo/world/elevator -m 'data: "0"'  # 1층 이동
+gz topic -p /gazebo/world/elevator -m 'data: "1"'  # 2층 이동
+gz topic -p /gazebo/world/elevator -m 'data: "2"'  # 3층 이동
+```
+ - 워크스페이스(ws) 수정 후 다시 빌드하는 법
+```
+cd (수정한 워크스페이스의 위치)
+colcon build --symlink-install
+source install/local-setup.bash
+ros2 launch licar_bringup ..런치 파일..
+```
+ - gazebo 프로젝트 구조 및 구성하는 법
+
+    [Reference Link](https://mkdrone.tistory.com/14?category=1142298)

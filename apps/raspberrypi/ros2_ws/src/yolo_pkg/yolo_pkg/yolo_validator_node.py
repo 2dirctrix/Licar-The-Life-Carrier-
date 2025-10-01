@@ -9,7 +9,6 @@ import cv2
 import json
 import torch
 import os
-import time
 import threading
 
 class SystemState:
@@ -149,17 +148,6 @@ class YoloValidatorNode(Node):
                 self.get_logger().error(f"Error processing MQTT message: {e}")
                 self.set_state(SystemState.IDLE)
 
-    def open_door_after_delay_callback(self):
-        self.get_logger().info("10-second delay finished. Opening the door now.")
-        open_msg = Bool(); open_msg.data = True
-        self.open_publisher.publish(open_msg)
-        
-        # 상태를 VALIDATING으로 변경
-        self.set_state(SystemState.MANUAL_OPEN_DONE)
-        
-        # 이 타이머는 이제 필요 없으므로 파괴
-        self.oneshot_timer.destroy()
-
     def nfc_tag_callback(self, msg):
         state = self.get_state()
 
@@ -197,8 +185,7 @@ class YoloValidatorNode(Node):
         elif state == SystemState.SIMULATOR_RUNNING:
             # 3번 플래그: 시뮬레이터 작동 중 -> NFC 무시
             self.get_logger().info("NFC tag ignored: Simulator is currently running.")
-            #return
-            self.oneshot_timer = self.create_timer(5.0, self.open_door_after_delay_callback)
+            return
 
         elif state == SystemState.MANUAL_OPEN:
             # 4번 플래그: 시뮬레이터 정지 후 태그 -> 문만 열기
@@ -210,13 +197,12 @@ class YoloValidatorNode(Node):
 
         elif state == SystemState.MANUAL_OPEN_DONE:
             # 5번 플래그: 수동으로 문이 열린 상태에서 태그 -> 문 닫고 초기화
-            close_msg = Int32()
-            close_msg.data = -1 # 수동 닫기임을 나타내는 값
+            self.get_logger().info("Manual close tag received. Closing the door and resetting.")
+            close_msg = Bool(); close_msg.data = True
             self.close_publisher.publish(close_msg)
-            
             # 모든 상태를 초기화
-            self.set_state(SystemState.IDLE)
-            with self._lock:
+            with self.lock:
+                self.current_state = SystemState.IDLE
                 self.transport_id = None
                 self.drug_id_map = {}
                 self.target_pills = {}
